@@ -168,6 +168,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pacts .act.src{border-color:#1d9bf0;color:#1d9bf0}
 /* 详情：灰边 */
 .pacts .act.more{margin-left:auto}
+/* ===== 本站阅读视图 ===== */
+.reader-wrap{position:fixed;inset:0;background:#000;z-index:10000;display:flex;flex-direction:column;overflow:hidden}
+.reader{display:flex;flex-direction:column;height:100%;background:#000}
+.rd-bar{position:sticky;top:0;display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(0,0,0,.92);border-bottom:1px solid #2f3336;z-index:2;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.rd-back{background:none;border:none;color:#1d9bf0;font-size:15px;font-weight:600;cursor:pointer;padding:4px 2px}
+.rd-src{flex:1;font-size:13px;color:#71767b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.rd-out{color:#1d9bf0;font-size:13px;font-weight:600;white-space:nowrap}
+.rd-body{padding:20px 18px 60px;overflow-y:auto;-webkit-overflow-scrolling:touch;max-width:720px;margin:0 auto;width:100%}
+.rd-title{font-size:21px;line-height:1.42;font-weight:700;color:#e7e9ea;margin:0 0 12px;letter-spacing:-.2px}
+.rd-meta{font-size:12.5px;color:#71767b;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #2f3336}
+.rd-lead{font-size:15px;line-height:1.75;color:#c7cdd3;background:#0d1117;border-left:3px solid #1d9bf0;padding:12px 14px;border-radius:8px;margin-bottom:20px}
+.rd-p{font-size:16px;line-height:1.85;color:#d6d9db;margin:0 0 16px;word-break:break-word}
+.rd-empty{font-size:14px;line-height:1.9;color:#71767b;text-align:center;padding:40px 0}
+.rd-link{color:#1d9bf0;font-weight:600}
 
 </style>
 </head>
@@ -187,6 +201,7 @@ window.addEventListener('unhandledrejection', e => {
 });
 </script>
 <script src="feeds.js"></script>
+<script src="articles.js?v=2"></script>
 <script type="module">
 /* ===== 内联模块包：minis:// 下外部 module src 可能被截断，故全部内联 ===== */
 /* ============ React 18 通过 esm.sh 加载 ============ */
@@ -430,7 +445,7 @@ const nfmt = (n) => n >= 10000 ? (n / 10000).toFixed(1) + '万'
   : n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n);
 
 /* ---------- 单条推文（X 的核心组件） ---------- */
-function Post({ p, onOpen }) {
+function Post({ p, onOpen, onRead }) {
   const cat = CAT[p.category];
   const { lead: t1, rest: t2 } = splitTitle(p.title);
 
@@ -462,15 +477,12 @@ function Post({ p, onOpen }) {
         ? h('div', { className: 'pcat' }, h('span', { className: 'chip ' + p.category }, CAT[p.category]))
         : null,
 
-      // 操作栏：两个真实入口（站内阅读 / 查看原文）
+      // 操作栏：两个真实入口（本站阅读 / 查看原文）
       h('div', { className: 'pacts' },
-        p.aihot
-          ? h('a', {
-              className: 'act open',
-              href: p.aihot, target: '_self',
-              onClick: e => e.stopPropagation()
-            }, '站内阅读 →')
-          : null,
+        h('button', {
+          className: 'act open',
+          onClick: e => { e.stopPropagation(); onRead(p); }
+        }, '本站阅读 →'),
         p.original
           ? h('a', {
               className: 'act src',
@@ -488,7 +500,7 @@ function Post({ p, onOpen }) {
 }
 
 /* ---------- 详情抽屉（X 点开推文的模态） ---------- */
-function Detail({ p, onClose }) {
+function Detail({ p, onClose, onRead }) {
   
   useEffect(() => {
     const k = e => e.key === 'Escape' && onClose();
@@ -516,9 +528,38 @@ function Detail({ p, onClose }) {
           p.score != null ? h('span', { className: 'chip' }, 'score ' + p.score) : null
         ),
         h('div', { className: 'slinks' },
-          p.aihot ? h('a', { className: 'btn primary', href: p.aihot, target: '_self' }, '站内阅读') : null,
+          h('button', { className: 'btn primary', onClick: () => onRead(p) }, '本站阅读'),
           p.original ? h('a', { className: 'btn', href: p.original, target: '_self' }, '查看原文') : null
         )
+      )
+    )
+  );
+}
+
+/* ---------- 本地阅读视图（在本项目内看正文，不跳出去） ---------- */
+function Reader({ p, onClose }) {
+  if (!p) return null;
+  const art = window.AIHOT_ARTICLES && window.AIHOT_ARTICLES[p.id];
+  const paras = (art && art.paras) ? art.paras : [];
+  const chars = art ? (art.chars || 0) : 0;
+
+  return h('div', { className: 'reader-wrap', onClick: onClose },
+    h('div', { className: 'reader', onClick: e => e.stopPropagation() },
+      h('div', { className: 'rd-bar' },
+        h('button', { className: 'rd-back', onClick: onClose }, '← 返回'),
+        h('div', { className: 'rd-src' }, p.source || ''),
+        p.original ? h('a', { className: 'rd-out', href: p.original, target: '_self' }, '原文 ↗') : null
+      ),
+      h('div', { className: 'rd-body' },
+        h('h1', { className: 'rd-title' }, p.title),
+        h('div', { className: 'rd-meta' }, relTime(p.publishedAt), ' · ', p.source || '', chars ? ' · 本站已存 ' + chars + ' 字' : ''),
+        p.summary ? h('div', { className: 'rd-lead' }, p.summary) : null,
+        paras.length
+          ? paras.map((t, i) => h('p', { key: i, className: 'rd-p' }, t))
+          : h('div', { className: 'rd-empty' },
+              '本站尚未抓取这篇的正文。',
+              h('br'),
+              h('a', { href: p.original, target: '_self', className: 'rd-link' }, '→ 去看原文'))
       )
     )
   );
@@ -532,6 +573,7 @@ function App() {
   const [tab, setTab] = useState('all');
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(null);
+  const [reading, setReading] = useState(null);
   const [err, setErr] = useState('');
 
   const load = useCallback(async (which) => {
@@ -644,12 +686,19 @@ function App() {
               h('div', { className: 'ebig' }, '∅'),
               h('h3', null, '没有匹配的内容'),
               h('p', null, '换个关键词，或切回「全部」'))
-          : view.map(p => h(Post, { key: p.id || p.title, p, onOpen: setOpen }))
+          : view.map(p => h(Post, { key: p.id || p.title, p, onOpen: setOpen, onRead: setReading }))
     ),
     ),  /* /col */
 
     // ===== 详情抽屉 =====
-    h(Detail, { p: open, onClose: () => setOpen(null) }),
+    h(Detail, {
+      p: open,
+      onClose: () => setOpen(null),
+      onRead: (x) => { setOpen(null); setReading(x); }
+    }),
+
+    // ===== 本站阅读视图 =====
+    h(Reader, { p: reading, onClose: () => setReading(null) }),
 
     // ===== 右下浮动按钮（X 的发帖按钮位）=====
     h('button', {
