@@ -106,3 +106,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .reply,.repost,.like,.save,.views{display:flex;align-items:center;gap:6px}
 .st{color:#71767b}
 .snap{color:#f0b968}
+/* ===== 去头像后的补充 + 触摸优化 ===== */
+.post{position:relative}
+.post:active{background:#080808}
+/* 去掉头像列后主体占满整行 */
+.pmain{padding:0}
+/* 抽屉里的来源行 */
+.srow{display:flex;gap:10px;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #2f3336}
+/* 触摸端去掉点击高亮闪烁，用 :active 背景代替 */
+*{-webkit-tap-highlight-color:transparent}
+.post *{pointer-events:none}
+.post a, .post button{pointer-events:auto}
