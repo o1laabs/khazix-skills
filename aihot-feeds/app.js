@@ -257,27 +257,51 @@ function render() {
   box.appendChild(f);
 }
 
+/* 从来源名生成稳定的头像色 + 首字（微信订阅号那种） */
+function avatarOf(name) {
+  const s = String(name || '?').replace(/^[Xx]：\s*/, '').replace(/[（(].*?[)）]/g, '').trim() || '?';
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  const palette = [
+    ['#5b8cff', '#3d63cc'], ['#3ecf8e', '#2a9d6b'], ['#f5a524', '#c47f12'],
+    ['#7c5cff', '#5a3fd6'], ['#f0616d', '#c9404f'], ['#38bdf8', '#0e8fc4'],
+    ['#f094b8', '#c96a91'], ['#a78bfa', '#7f5fe0'], ['#5fd6c4', '#33a394'],
+  ];
+  const [c1, c2] = palette[h % palette.length];
+  return { ch: s[0] || '?', grad: `linear-gradient(135deg,${c1},${c2})` };
+}
+
 function card(r) {
-  const catKey = CAT[r.category] || r.category;
-  const catCls = CAT[r.category] && r.category in CAT ? (CAT[r.category] === catKey ? r.category : r.category) : '';
+  const catKey = CAT[r.category] || '';
+  const av = avatarOf(r.source);
   const c = el('div', 'card');
+  const hasThumb = !!(r.summary && r.summary.length > 40);
   c.innerHTML = `
-    <div class="ctop">
-      ${catKey ? `<span class="cat ${esc(r.category || '')}">${esc(catKey)}</span>` : ''}
-      <span class="src">${esc(r.source || '未知来源')}</span>
-      <span class="time">${ago(r.publishedAt)}</span>
+    <div class="cbody">
+      <div class="cmain">
+        <div class="ctitle">${esc(r.title)}</div>
+        ${r.summary ? `<div class="csum">${esc(r.summary)}</div>` : ''}
+        <div class="cfoot">
+          <span class="cavatar" style="background:${av.grad}">${esc(av.ch)}</span>
+          <span class="src">${esc(r.source || '未知来源')}</span>
+          <span class="time">${ago(r.publishedAt)}</span>
+        </div>
+      </div>
+      ${hasThumb ? `<div class="cthumb"><span class="fav" style="background:${av.grad}">${esc(av.ch)}</span></div>` : ''}
     </div>
-    <div class="ctitle">${esc(r.title)}</div>
-    <div class="csum">${esc(r.summary || '（无摘要）')}</div>
-    ${r.reason ? `<div class="reason"><b>推荐理由</b> · ${esc(r.reason)}</div>` : ''}
-    <div class="cfoot">
+    <div class="cmeta">
+      ${catKey ? `<span class="cat ${esc(r.category)}">${esc(catKey)}</span>` : ''}
       ${r.aihot ? `<a class="lk" href="${esc(r.aihot)}" target="_blank" rel="noopener">站内阅读 →</a>` : ''}
       ${r.original ? `<a class="lk dim" href="${esc(r.original)}" target="_blank" rel="noopener">原文</a>` : ''}
       ${r.score != null ? `<span class="score">score ${esc(r.score)}</span>` : ''}
-    </div>`;
+    </div>
+    ${r.reason ? `<div class="reason"><b>推荐理由</b> · ${esc(r.reason)}</div>` : ''}`;
 
-  // 点卡片正文区展开/收起
-  c.querySelector('.ctitle').onclick = c.querySelector('.csum').onclick = () => c.classList.toggle('open');
+  // 点正文区展开/收起（链接不触发）
+  c.querySelector('.cbody').onclick = (e) => {
+    if (e.target.closest('a')) return;
+    c.classList.toggle('open');
+  };
   return c;
 }
 
