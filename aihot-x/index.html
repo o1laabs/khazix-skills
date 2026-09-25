@@ -5,7 +5,117 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>AIHOT / X</title>
-<link rel="stylesheet" href="style.css">
+<style>
+:root{--bg:#000;--bg2:#16181c;--line:#2f3336;--tx:#e7e9ea;--tx2:#71767b;--ac:#1d9bf0;--ac2:#1a8cd8;--ok:#00ba7c;--bad:#f4212e;--like:#f91880}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{color:var(--tx);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.boot{padding:40px;text-align:center;color:var(--tx2)}
+.app{display:flex;min-height:100vh;max-width:1100px;margin:0 auto}
+.sidenav{display:none;flex:0 0 220px;flex-direction:column;gap:4px;padding:10px 12px;position:sticky;top:0;height:100vh}
+.sidenav .brand{width:50px;height:50px;display:grid;place-items:center;border-radius:999px;margin-bottom:6px}
+.sidenav svg{width:27px;height:27px;fill:var(--tx)}
+.navlist{display:flex;flex-direction:column;gap:2px}
+.navitem{display:flex;align-items:center;gap:16px;padding:10px 12px;border-radius:999px;font-size:19px;transition:.15s}
+.navitem:hover{background:var(--bg2)}
+.navitem .ni svg{width:24px;height:24px;fill:var(--tx)}
+.navitem.on{font-weight:700}
+.postbtn{margin-top:14px;padding:14px;border-radius:999px;background:var(--ac);color:#fff;font-weight:700;font-size:16px}
+.col{flex:1;min-width:0;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:11px 14px;background:rgba(0,0,0,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.xlogo svg{width:24px;height:24px;fill:var(--tx)}
+.tb-title{font-size:19px;font-weight:800;letter-spacing:-.3px;flex:1}
+.tb-right{display:flex;gap:8px}
+.iconbtn{width:34px;height:34px;border-radius:999px;display:grid;place-items:center;font-size:15px;color:var(--tx2)}
+.iconbtn:hover{background:var(--bg2);color:var(--tx)}
+.iconbtn.on{color:var(--ac)}
+.statusbar{padding:7px 14px;font-size:12.5px;color:var(--tx2);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:0 0 auto}
+.dot.loading{background:#ffd400}
+.dot.err{background:var(--bad)}
+.chip{background:var(--bg2);border-radius:999px;padding:1px 8px;font-size:11.5px}
+/* 第二部分 */
+.searchbar{padding:10px 14px;border-bottom:1px solid var(--line)}
+.sicon{display:none}
+.searchbar input{width:100%;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);color:var(--tx);font-size:14px;outline:none}
+.searchbar input::placeholder{color:var(--tx2)}
+.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:14px 15px;font-size:14.5px;color:var(--tx2);position:relative;white-space:nowrap;font-weight:500}
+.tab.on{color:var(--tx);font-weight:700}
+.tab.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:2px;background:var(--ac)}
+.tabn{color:var(--tx2);font-size:12.5px;margin-left:4px;font-weight:400}
+.feed{display:block}
+.post{display:flex;gap:11px;padding:13px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.post:hover{background:rgba(255,255,255,.025)}
+.pav{flex:0 0 40px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:700;color:#fff}
+.pmain{flex:1;min-width:0}
+.phead{display:flex;align-items:center;gap:4px;font-size:14.5px;flex-wrap:wrap;margin-bottom:2px}
+.pname{font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:45%}
+.pdot{color:var(--tx2);margin:0 3px}
+.ptime{color:var(--tx2);font-size:14px}
+.pmore{margin-left:auto;color:var(--tx2);font-size:15px;padding:0 4px;border-radius:999px}
+.ptext{margin:1px 0 0;font-size:14.5px;line-height:1.5;word-wrap:break-word}
+.pt1{color:var(--tx);font-weight:600;display:block}
+.pt2{color:var(--tx);font-weight:400;display:block;margin-top:3px}
+.psum{color:var(--tx2);font-size:13.5px;line-height:1.5;margin:5px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pcat{display:inline-block;font-size:11.5px;color:var(--ac);margin-top:6px;font-weight:600}
+.pacts{display:flex;gap:8px;margin-top:10px;max-width:380px;justify-content:space-between}
+.act{display:flex;align-items:center;gap:5px;color:var(--tx2);font-size:12.5px;padding:3px 6px;border-radius:999px}
+.act svg{width:17px;height:17px;fill:currentColor}
+/* 第三部分：抽屉 / 骨架 / 响应式 */
+.sheet-wrap{position:fixed;inset:0;background:rgba(91,112,131,.4);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#000;width:100%;max-width:600px;max-height:88vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;animation:up .2s ease-out;border:1px solid var(--line);border-bottom:none}
+@keyframes up{from{transform:translateY(30px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.sheet-bar{display:flex;justify-content:flex-start;padding:10px 14px;border-bottom:1px solid var(--line)}
+.sheet-bar button{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:var(--tx);font-size:17px;cursor:pointer}
+.sheet-bar button:hover{background:var(--bg2)}
+.sheet-body{padding:14px 18px 40px;overflow-y:auto;font-size:15px;line-height:1.6}
+.sheet-body h2{font-size:19px;margin:10px 0;font-weight:700;line-height:1.35}
+.sheet-body p{color:var(--tx2);margin:9px 0}
+.sheet-body a{color:var(--ac);display:inline-block;margin:5px 14px 5px 0;font-weight:600}
+.reason{background:var(--bg2);border-left:3px solid var(--ac);padding:10px 13px;border-radius:8px;margin:12px 0;font-size:14px;color:var(--tx)}
+.fab{position:fixed;right:18px;bottom:74px;width:54px;height:54px;border-radius:50%;border:none;background:var(--ac);color:#fff;font-size:22px;cursor:pointer;z-index:60;display:none}
+.statusbar{position:fixed;left:0;right:0;bottom:0;height:53px;background:rgba(0,0,0,.92);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;z-index:70;backdrop-filter:blur(12px)}
+.statusbar a{color:var(--tx2);padding:8px;border-radius:50%}
+.statusbar a.on{color:var(--tx)}
+.center{text-align:center;padding:60px 20px;color:var(--tx2)}
+.spinner{width:26px;height:26px;border:2.5px solid var(--line);border-top-color:var(--ac);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(min-width:1000px){
+  .app{flex-direction:row;max-width:1265px;margin:0 auto}
+  .sidenav{display:flex;flex-direction:column;gap:4px;width:275px;flex:0 0 275px;padding:8px 12px;border-right:1px solid var(--line);position:sticky;top:0;height:100vh}
+  .col{max-width:600px;border-right:1px solid var(--line)}
+  .statusbar{display:none}
+  .fab{display:block}
+}
+@media(max-width:999px){
+  .sidenav{display:none}
+  .col{border:none}
+}
+
+/* ===== 补齐：分类标签色 + 剩余元素 ===== */
+.pcat.ai-models{background:#2a1f3d;color:#c4a5ff}
+.pcat.ai-products{background:#132b2a;color:#5fd6c4}
+.pcat.industry{background:#2e2418;color:#f0b968}
+.pcat.paper{background:#1a2733;color:#7fb8e8}
+.pcat.tip{background:#2b1f28;color:#f094b8}
+
+.avatar{display:grid;place-items:center;font-weight:700;color:#fff;flex:0 0 auto}
+
+.tb-left{display:flex;align-items:center;gap:10px}
+.nl{font-size:19px;font-weight:400;line-height:1}
+.like.on,.repost.on{color:#f91880}
+.save.on{color:#1d9bf0}
+
+.views{font-size:12.5px;color:#71767b}
+.reply,.repost,.like,.save,.views{display:flex;align-items:center;gap:6px}
+.st{color:#71767b}
+.snap{color:#f0b968}
+
+</style>
 </head>
 <body>
 <div id="root"><div class="boot">载入中…</div></div>
@@ -23,6 +133,499 @@ window.addEventListener('unhandledrejection', e => {
 });
 </script>
 <script src="feeds.js"></script>
-<script type="module" src="app.jsx.js"></script>
+<script type="module">
+/* ===== 内联模块包：minis:// 下外部 module src 可能被截断，故全部内联 ===== */
+/* ============ React 18 通过 esm.sh 加载 ============ */
+/* minis:// 下不能用 fetch()，但 <script type="module"> 的 import 走的是
+   模块加载器（不是 fetch API），实测可用。 */
+
+import React from 'https://esm.sh/react@18.3.1';
+import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
+
+
+
+/* h = React.createElement 的简写 */
+const h = React.createElement;
+
+/* ============ 数据层 ============ */
+/* 注意：minis:// 下 fetch() 不可用，所以快照走 window.AIHOT_SNAPSHOT（feeds.js 注入）。
+   API 端点有 CORS 可直连，但慢（实测 ~10s），故作为可选数据源。 */
+
+const API = 'https://aihot.news/api/v1';
+
+const CAT = {
+  'ai-models': 'AI 模型',
+  'ai-products': 'AI 产品',
+  'industry': '行业',
+  'paper': '论文',
+  'tip': '技巧观点',
+};
+
+/* 从来源名生成稳定的头像色 + 首字（X 头像那种） */
+function avatarOf(name) {
+  const s = String(name || '?').replace(/^[Xx]：\s*/, '').replace(/[（(].*?[)）]/g, '').trim() || '?';
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  const palette = [
+    ['#1d9bf0', '#0d6efd'], ['#00ba7c', '#00875a'], ['#f91880', '#c4106a'],
+    ['#7856ff', '#5a3fd6'], ['#ffd400', '#e0a800'], ['#ff7a00', '#d95f00'],
+    ['#00b8d4', '#0088a8'], ['#e0245e', '#b01048'], ['#17bf63', '#0f8a48'],
+  ];
+  const [c1, c2] = palette[h % palette.length];
+  return { ch: s[0] || '?', grad: `linear-gradient(135deg,${c1},${c2})` };
+}
+
+/* X 上 handle 那种 @xxx */
+function handleOf(name) {
+  const s = String(name || 'unknown').replace(/^[Xx]：\s*/, '').replace(/[（(].*?[)）]/g, '').trim();
+  const ascii = s.replace(/[^a-zA-Z0-9]/g, '');
+  if (ascii.length >= 3) return '@' + ascii.slice(0, 15).toLowerCase();
+  return '@' + (s.length ? encodeURIComponent(s).replace(/%/g, '').slice(0, 12).toLowerCase() : 'unknown');
+}
+
+function ago(iso) {
+  if (!iso) return '';
+  const t = new Date(iso).getTime();
+  if (!t) return '';
+  const s = Math.max(0, (Date.now() - t) / 1000);
+  if (s < 60) return Math.floor(s) + '秒';
+  if (s < 3600) return Math.floor(s / 60) + '分钟';
+  if (s < 86400) return Math.floor(s / 3600) + '小时';
+  if (s < 2592000) return Math.floor(s / 86400) + '天';
+  return new Date(iso).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+}
+
+function fullTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/* 归一化：API 条目 与 快照条目 统一成同一形状 */
+function normalize(it) {
+  const src = typeof it.source === 'string' ? it.source : (it.source && it.source.name) || '';
+  const links = it.links || {};
+  return {
+    id: it.id,
+    title: it.title || '',
+    summary: it.summary || '',
+    source: src,
+    category: it.category || null,
+    score: it.score ?? null,
+    selected: !!it.selected,
+    reason: it.reason || '',
+    publishedAt: it.publishedAt || null,
+    aihot: it.aihot || links.aihot || null,
+    original: it.original || links.original || null,
+  };
+}
+
+/* 源 A：本地快照（秒开） */
+function loadSnapshot() {
+  const d = window.AIHOT_SNAPSHOT;
+  if (!d) throw new Error('feeds.js 未加载，请先运行 python3 fetch_feeds.py');
+  const raw = (d.archive && d.archive.length) ? d.archive
+    : (d.feeds && d.feeds.selected) || [];
+  const seen = new Set();
+  const rows = [];
+  for (const it of raw) {
+    if (!it || !it.id || seen.has(it.id)) continue;
+    seen.add(it.id);
+    rows.push(normalize(it));
+  }
+  rows.sort((a, b) => (b.publishedAt || '').localeCompare(a.publishedAt || ''));
+  return {
+    rows,
+    meta: { src: '本地快照', at: d.generatedAt || null, live: false },
+  };
+}
+
+/* 源 B：API 直连（有 CORS，但慢） */
+async function loadAPI() {
+  const j = await fetch(`${API}/items?mode=all&window=24h&limit=100`);
+  if (!j.ok) throw new Error('HTTP ' + j.status);
+  const d = await j.json();
+  const seen = new Set();
+  const rows = [];
+  for (const it of d.items || []) {
+    if (!it || !it.id || seen.has(it.id)) continue;
+    seen.add(it.id);
+    rows.push(normalize(it));
+  }
+  rows.sort((a, b) => (b.publishedAt || '').localeCompare(a.publishedAt || ''));
+  return {
+    rows,
+    meta: { src: 'API 直连', at: new Date().toISOString(), live: true },
+  };
+}
+
+/* 热点榜（右侧栏用） */
+async function loadHotTopics() {
+  const r = await fetch(`${API}/hot-topics`);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  return (d.items || []).slice(0, 6);
+}
+
+/* ---------- 供 UI 层使用的辅助 ---------- */
+
+/* 分类 tab 定义：[key, 中文名] */
+const CATS = [
+  ['all', '全部'],
+  ['ai-models', 'AI 模型'],
+  ['ai-products', 'AI 产品'],
+  ['industry', '行业'],
+  ['paper', '论文'],
+  ['tip', '技巧观点'],
+];
+
+/* 相对时间（UI 用，X 上那种「23分钟」） */
+function relTime(iso) {
+  return ago(iso);
+}
+
+/* 标题按 X 的推文风格切分：首句作正文，其余作补充 */
+function splitTitle(title) {
+  const t = String(title || '').trim();
+  const m = t.match(/^(.{8,60}?)[：:，,。]\s*(.+)$/s);
+  if (m) return { lead: m[1], rest: m[2] };
+  return { lead: t, rest: '' };
+}
+
+/* 按哈希决定「配图」高矮，制造 X 媒体卡那种不等高观感 */
+function coverRatio(r) {
+  const s = String(r.title || '') + String(r.source || '');
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return (h % 3 === 0) ? 'tall' : '';
+}
+
+/* 统一加载入口：优先 API（实时），失败回退快照 */
+async function loadFeed(prefer) {
+  if (prefer === 'api') {
+    try { return await loadAPI(); }
+    catch (e) { return { ...loadSnapshot(), warn: 'API 直连失败，已回退本地快照：' + e.message }; }
+  }
+  return loadSnapshot();
+}
+
+/* ============ X 风格的图标（内联 SVG，对齐 X 的官方图标形状） ============ */
+
+
+const S = (d, opts = {}) => h('svg', {
+  viewBox: '0 0 24 24',
+  fill: opts.fill || 'currentColor',
+  'aria-hidden': 'true',
+  ...opts.attrs,
+}, h('path', { d }));
+
+const Icon = {
+  // X logo
+  Logo: () => S('M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'),
+
+  Home: ({ solid } = {}) => solid
+    ? S('M21.591 7.146L12.52 1.157c-.316-.21-.724-.21-1.04 0l-9.071 5.99c-.26.173-.409.456-.409.757v13.183c0 .502.418.913.929.913H9.14c.51 0 .929-.41.929-.913v-7.075h3.909v7.075c0 .502.417.913.928.913h6.165c.511 0 .929-.41.929-.913V7.904c0-.301-.158-.584-.408-.758z')
+    : S('M12 1.696L.622 8.807l1.06 1.696L3 9.679V19.5C3 20.881 4.119 22 5.5 22h13c1.381 0 2.5-1.119 2.5-2.5V9.679l1.318.824 1.06-1.696L12 1.696zM12 16.5c-1.933 0-3.5-1.567-3.5-3.5s1.567-3.5 3.5-3.5 3.5 1.567 3.5 3.5-1.567 3.5-3.5 3.5z'),
+
+  Search: () => S('M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.824 5.262l4.781 4.781-1.414 1.414-4.781-4.781c-1.447 1.142-3.276 1.824-5.262 1.824-4.694 0-8.5-3.806-8.5-8.5z'),
+
+  Reply: () => S('M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z'),
+
+  Repost: () => S('M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z'),
+
+  Like: ({ solid } = {}) => solid
+    ? S('M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z')
+    : S('M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z'),
+
+  Views: () => S('M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z'),
+
+  Bookmark: ({ solid } = {}) => solid
+    ? S('M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z')
+    : S('M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z'),
+
+  More: () => S('M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z'),
+
+  Share: () => S('M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z'),
+
+  Sparkle: () => S('M22.772 10.506l-5.618-2.192-2.16-6.5c-.102-.307-.39-.514-.712-.514s-.61.207-.712.513l-2.16 6.5-5.62 2.192c-.287.112-.477.39-.477.7s.19.585.478.698l5.62 2.192 2.16 6.5c.102.306.39.513.712.513s.61-.207.712-.513l2.16-6.5 5.618-2.192c.287-.112.477-.39.477-.7s-.19-.585-.478-.697z'),
+
+  Pen: () => S('M23 3c-6.62-.1-10.38 2.421-13.05 6.03C7.29 12.61 6 17.331 6 22h2c0-1.007.07-2.012.19-3H12c4.1 0 7.48-3.082 7.94-7.054C22.79 10.147 23.17 6.359 23 3zm-7 8h-1.5v2H16c.63-.016 1.2-.08 1.72-.188C16.95 15.24 14.68 17 12 17H8.55c.57-2.512 1.57-4.851 3-6.78 2.16-2.912 5.29-4.911 9.45-5.187C20.95 8.079 19.9 11 16 11z'),
+
+  Bell: ({ solid } = {}) => solid
+    ? S('M11.996 2c-4.062 0-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.959C19.488 5.021 16.06 2 11.996 2z')
+    : S('M19.993 9.042C19.48 5.017 16.054 2 11.996 2s-7.49 3.021-7.999 7.051L2.866 18H7.1c.463 2.282 2.481 4 4.9 4s4.437-1.718 4.9-4h4.236l-1.143-8.958zM12 20c-1.306 0-2.417-.835-2.829-2h5.658c-.412 1.165-1.523 2-2.829 2zm-6.866-4l.847-6.698C6.364 6.272 8.941 4 11.996 4s5.627 2.268 6.013 5.295L18.864 16H5.134z'),
+
+  User: ({ solid } = {}) => solid
+    ? S('M17.863 13.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46C7.627 11.77 9.648 11 12 11s4.373.77 5.863 2.44zM12 2C9.791 2 8 3.79 8 6s1.791 4 4 4 4-1.79 4-4-1.791-4-4-4z')
+    : S('M5.651 19h12.698c-.337-1.8-1.023-3.21-1.945-4.19C15.318 13.65 13.838 13 12 13s-3.317.65-4.404 1.81c-.922.98-1.608 2.39-1.945 4.19zm.486-5.56C7.627 11.85 9.648 11 12 11s4.373.85 5.863 2.44c1.477 1.58 2.366 3.8 2.632 6.46l.11 1.1H3.395l.11-1.1c.266-2.66 1.155-4.88 2.632-6.46zM12 4c-1.105 0-2 .9-2 2s.895 2 2 2 2-.9 2-2-.895-2-2-2zM8 6c0-2.21 1.791-4 4-4s4 1.79 4 4-1.791 4-4 4-4-1.79-4-4z'),
+
+  verified: () => S('M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z'),
+};
+
+/* ============ AIHOT / X —— 主应用（React 18，X 风格） ============ */
+
+
+
+
+const { useState, useEffect, useMemo, useCallback, useRef } = React;
+
+/* ---------- 工具 ---------- */
+const cls = (...a) => a.filter(Boolean).join(' ');
+const nfmt = (n) => n >= 10000 ? (n / 10000).toFixed(1) + '万'
+  : n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n);
+
+/* ---------- 单条推文（X 的核心组件） ---------- */
+function Post({ p, onOpen }) {
+  const [liked, setLiked] = useState(false);
+  const [reposted, setReposted] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const av = avatarOf(p.source);
+
+  // 由 score 派生一个稳定的互动数（X 每条都带数字，视觉上不能空）
+  const seed = useMemo(() => {
+    let h = 0; const s = p.id || p.title || '';
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  }, [p.id, p.title]);
+  const base = Math.max(1, Math.round((p.score || 30) * 1.6));
+  const nReply = (seed % 37) + base % 23;
+  const nRepost = (seed % 211) + base;
+  const nLike = (seed % 900) + base * 3;
+  const nView = (seed % 90000) + base * 420;
+
+  const { lead: t1, rest: t2 } = splitTitle(p.title);
+
+  return h('article', { className: 'post', onClick: () => onOpen(p) },
+    // 头像列
+    h('div', { className: 'pav' },
+      h('div', { className: 'avatar', style: { background: av.grad } }, av.ch)
+    ),
+
+    // 主体
+    h('div', { className: 'pmain' },
+      // 头部：来源 + 蓝勾 + 时间 + 更多
+      h('div', { className: 'phead' },
+        h('span', { className: 'pname' }, p.source || '未知来源'),
+        p.verified ? h('span', { className: 'verified', title: '已认证' }, Icon.verified()) : null,
+        h('span', { className: 'pdot' }, '·'),
+        h('span', { className: 'ptime' }, relTime(p.publishedAt)),
+        h('button', { className: 'pmore', 'aria-label': '更多' }, Icon.More())
+      ),
+
+      // 正文
+      h('div', { className: 'ptext' },
+        t1 && h('div', { className: 'pt1' }, t1),
+        t2 && h('div', { className: 'pt2' }, t2)
+      ),
+
+      // 摘要
+      p.summary ? h('div', { className: 'psum' }, p.summary) : null,
+
+      // 分类徽章
+      p.category && CAT[p.category]
+        ? h('div', { className: 'pcat' }, h('span', { className: 'chip ' + p.category }, CAT[p.category]))
+        : null,
+
+      // 操作栏（X 的四个按钮 + 浏览量）
+      h('div', { className: 'pacts' },
+        h('button', { className: 'act reply', onClick: e => e.stopPropagation() },
+          Icon.Reply(), h('span', null, nfmt(nReply))),
+        h('button', {
+          className: cls('act repost', reposted && 'on-repost'),
+          onClick: e => { e.stopPropagation(); setReposted(v => !v); }
+        }, Icon.Repost(), h('span', null, nfmt(nRepost + (reposted ? 1 : 0)))),
+        h('button', {
+          className: cls('act like', liked && 'on-like'),
+          onClick: e => { e.stopPropagation(); setLiked(v => !v); }
+        }, Icon.Like({ solid: liked }), h('span', null, nfmt(nLike + (liked ? 1 : 0)))),
+        h('button', {
+          className: cls('act save', saved && 'on-save'),
+          onClick: e => { e.stopPropagation(); setSaved(v => !v); }
+        }, Icon.Bookmark({ solid: saved })),
+        h('button', {
+          className: 'act views', onClick: e => { e.stopPropagation(); }
+        }, Icon.Views(), h('span', null, nfmt(nView)))
+      )
+    )
+  );
+}
+
+/* ---------- 详情抽屉（X 点开推文的模态） ---------- */
+function Detail({ p, onClose }) {
+  const av = p ? avatarOf(p.source) : null;
+  useEffect(() => {
+    const k = e => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', k);
+    return () => window.removeEventListener('keydown', k);
+  }, [onClose]);
+  if (!p) return null;
+  return h('div', { className: 'sheet-wrap', onClick: onClose },
+    h('div', { className: 'sheet', onClick: e => e.stopPropagation() },
+      h('div', { className: 'sheet-bar' },
+        h('button', { className: 'iconbtn', onClick: onClose, 'aria-label': '关闭' }, '✕')
+      ),
+      h('div', { className: 'sheet-body' },
+        h('div', { className: 'srow' },
+          h('div', { className: 'avatar lg', style: { background: av.grad } }, av.ch),
+          h('div', null,
+            h('div', { className: 'pname' }, p.source || '未知来源'),
+            h('div', { className: 'ptime' }, relTime(p.publishedAt))
+          )
+        ),
+        h('div', { className: 'stitle' }, p.title),
+        p.summary ? h('div', { className: 'ssum' }, p.summary) : null,
+        p.reason ? h('div', { className: 'sreason' }, h('b', null, '推荐理由'), ' · ' + p.reason) : null,
+        h('div', { className: 'smeta' },
+          p.category && CAT[p.category] ? h('span', { className: 'chip ' + p.category }, CAT[p.category]) : null,
+          p.score != null ? h('span', { className: 'chip' }, 'score ' + p.score) : null
+        ),
+        h('div', { className: 'slinks' },
+          p.aihot ? h('a', { className: 'btn primary', href: p.aihot, target: '_blank', rel: 'noopener' }, '站内阅读') : null,
+          p.original ? h('a', { className: 'btn', href: p.original, target: '_blank', rel: 'noopener' }, '查看原文') : null
+        )
+      )
+    )
+  );
+}
+
+/* ---------- 主应用 ---------- */
+function App() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [src, setSrc] = useState('snapshot');
+  const [tab, setTab] = useState('all');
+  const [q, setQ] = useState('');
+  const [open, setOpen] = useState(null);
+  const [err, setErr] = useState('');
+
+  const load = useCallback(async (which) => {
+    setLoading(true); setErr('');
+    try {
+      const r = await loadFeed(which);
+      setRows(r.rows); setSrc(r.src);
+    } catch (e) {
+      setErr(String(e.message || e));
+    } finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load('auto'); }, [load]);
+
+  const view = useMemo(() => {
+    let r = rows;
+    if (tab !== 'all') r = r.filter(x => x.category === tab);
+    if (q.trim()) {
+      const k = q.trim().toLowerCase();
+      r = r.filter(x => (x.title + ' ' + (x.summary || '') + ' ' + (x.source || '') + ' ' + (x.reason || ''))
+        .toLowerCase().includes(k));
+    }
+    return r;
+  }, [rows, tab, q]);
+
+  const counts = useMemo(() => {
+    const c = { all: rows.length };
+    CATS.forEach(([k]) => { c[k] = rows.filter(x => x.category === k).length; });
+    return c;
+  }, [rows]);
+
+  return h('div', { className: 'app' },
+    // ===== 左侧导航（X 的桌面侧栏；窄屏自动隐藏）=====
+    h('aside', { className: 'sidenav' },
+      h('div', { className: 'brand' }, Icon.Logo()),
+      h('nav', { className: 'navlist' },
+        [['home', '首页', Icon.Home()],
+         ['explore', '探索', Icon.Search()],
+         ['bell', '通知', Icon.Bell({})],
+         ['book', '书签', Icon.Bookmark({})],
+         ['user', '我的', Icon.User({})]].map(([k, label, ic]) =>
+          h('a', { key: k, className: cls('navitem', k === 'home' && 'on'), href: '#', onClick: e => e.preventDefault() },
+            h('span', { className: 'ni' }, ic),
+            h('span', { className: 'nl' }, label))
+        )
+      ),
+      h('button', { className: 'postbtn', onClick: () => load('auto') }, '刷新')
+    ),
+
+    // ===== 主列 =====
+    h('div', { className: 'col' },
+    // 顶部栏
+    h('header', { className: 'topbar' },
+      h('div', { className: 'tb-left' },
+        h('span', { className: 'xlogo' }, Icon.Logo())
+      ),
+      h('div', { className: 'tb-title' }, 'AIHOT'),
+      h('div', { className: 'tb-right' },
+        h('button', {
+          className: cls('iconbtn', src === 'live' && 'on'),
+          title: src === 'live' ? 'API 直连' : 'RSS 快照',
+          onClick: () => load(src === 'live' ? 'snapshot' : 'live')
+        }, src === 'live' ? '⚡' : '⛁'),
+        h('button', { className: 'iconbtn', onClick: () => load('auto'), title: '刷新' }, '⟳')
+      )
+    ),
+
+    // ===== 搜索栏 =====
+    h('div', { className: 'searchbar' },
+      h('span', { className: 'sicon' }, Icon.Search()),
+      h('input', {
+        value: q, onChange: e => setQ(e.target.value),
+        placeholder: '搜索 AIHOT', 'aria-label': '搜索'
+      }),
+      q ? h('button', { className: 'clear', onClick: () => setQ('') }, '✕') : null
+    ),
+
+    // ===== 分类 tab（X 的 For you / Following 那种）=====
+    h('nav', { className: 'tabs' },
+      [['all', '全部'], ...CATS].map(([k, label]) =>
+        h('button', {
+          key: k, className: cls('tab', tab === k && 'on'),
+          onClick: () => setTab(k)
+        },
+          h('span', null, label),
+          h('span', { className: 'tabn' }, counts[k] || 0)
+        )
+      )
+    ),
+
+    // ===== 状态条 =====
+    h('div', { className: 'statusbar' },
+      loading
+        ? h('span', { className: 'st load' }, '载入中…')
+        : err
+          ? h('span', { className: 'st err' }, err)
+          : h('span', { className: 'st' },
+              h('span', { className: 'dot ' + (src === 'live' ? 'live' : 'snap') }),
+              src === 'live' ? 'API 直连' : 'RSS 快照',
+              ' · ', view.length, ' 条'
+            )
+    ),
+
+    // ===== 信息流 =====
+    h('main', { className: 'feed' },
+      loading && !rows.length
+        ? h('div', { className: 'boot' }, '载入中…')
+        : view.length === 0
+          ? h('div', { className: 'empty' },
+              h('div', { className: 'ebig' }, '∅'),
+              h('h3', null, '没有匹配的内容'),
+              h('p', null, '换个关键词，或切回「全部」'))
+          : view.map(p => h(Post, { key: p.id || p.title, p, onOpen: setOpen }))
+    ),
+    ),  /* /col */
+
+    // ===== 详情抽屉 =====
+    h(Detail, { p: open, onClose: () => setOpen(null) }),
+
+    // ===== 右下浮动按钮（X 的发帖按钮位）=====
+    h('button', {
+      className: 'fab', title: '刷新',
+      onClick: () => load('auto')
+    }, Icon.Sparkle())
+  );
+}
+
+createRoot(document.getElementById('root')).render(h(App));
+
+</script>
 </body>
 </html>
