@@ -11,7 +11,7 @@ const nfmt = (n) => n >= 10000 ? (n / 10000).toFixed(1) + '万'
   : n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n);
 
 /* ---------- 单条推文（X 的核心组件） ---------- */
-function Post({ p, onOpen }) {
+function Post({ p, onOpen, onRead }) {
   const cat = CAT[p.category];
   const { lead: t1, rest: t2 } = splitTitle(p.title);
 
@@ -43,15 +43,12 @@ function Post({ p, onOpen }) {
         ? h('div', { className: 'pcat' }, h('span', { className: 'chip ' + p.category }, CAT[p.category]))
         : null,
 
-      // 操作栏：两个真实入口（站内阅读 / 查看原文）
+      // 操作栏：两个真实入口（本站阅读 / 查看原文）
       h('div', { className: 'pacts' },
-        p.aihot
-          ? h('a', {
-              className: 'act open',
-              href: p.aihot, target: '_self',
-              onClick: e => e.stopPropagation()
-            }, '站内阅读 →')
-          : null,
+        h('button', {
+          className: 'act open',
+          onClick: e => { e.stopPropagation(); onRead(p); }
+        }, '本站阅读 →'),
         p.original
           ? h('a', {
               className: 'act src',
@@ -69,7 +66,7 @@ function Post({ p, onOpen }) {
 }
 
 /* ---------- 详情抽屉（X 点开推文的模态） ---------- */
-function Detail({ p, onClose }) {
+function Detail({ p, onClose, onRead }) {
   
   useEffect(() => {
     const k = e => e.key === 'Escape' && onClose();
@@ -97,9 +94,38 @@ function Detail({ p, onClose }) {
           p.score != null ? h('span', { className: 'chip' }, 'score ' + p.score) : null
         ),
         h('div', { className: 'slinks' },
-          p.aihot ? h('a', { className: 'btn primary', href: p.aihot, target: '_self' }, '站内阅读') : null,
+          h('button', { className: 'btn primary', onClick: () => onRead(p) }, '本站阅读'),
           p.original ? h('a', { className: 'btn', href: p.original, target: '_self' }, '查看原文') : null
         )
+      )
+    )
+  );
+}
+
+/* ---------- 本地阅读视图（在本项目内看正文，不跳出去） ---------- */
+function Reader({ p, onClose }) {
+  if (!p) return null;
+  const art = window.AIHOT_ARTICLES && window.AIHOT_ARTICLES[p.id];
+  const paras = (art && art.paras) ? art.paras : [];
+  const chars = art ? (art.chars || 0) : 0;
+
+  return h('div', { className: 'reader-wrap', onClick: onClose },
+    h('div', { className: 'reader', onClick: e => e.stopPropagation() },
+      h('div', { className: 'rd-bar' },
+        h('button', { className: 'rd-back', onClick: onClose }, '← 返回'),
+        h('div', { className: 'rd-src' }, p.source || ''),
+        p.original ? h('a', { className: 'rd-out', href: p.original, target: '_self' }, '原文 ↗') : null
+      ),
+      h('div', { className: 'rd-body' },
+        h('h1', { className: 'rd-title' }, p.title),
+        h('div', { className: 'rd-meta' }, relTime(p.publishedAt), ' · ', p.source || '', chars ? ' · 本站已存 ' + chars + ' 字' : ''),
+        p.summary ? h('div', { className: 'rd-lead' }, p.summary) : null,
+        paras.length
+          ? paras.map((t, i) => h('p', { key: i, className: 'rd-p' }, t))
+          : h('div', { className: 'rd-empty' },
+              '本站尚未抓取这篇的正文。',
+              h('br'),
+              h('a', { href: p.original, target: '_self', className: 'rd-link' }, '→ 去看原文'))
       )
     )
   );
@@ -113,6 +139,7 @@ function App() {
   const [tab, setTab] = useState('all');
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(null);
+  const [reading, setReading] = useState(null);
   const [err, setErr] = useState('');
 
   const load = useCallback(async (which) => {
@@ -225,12 +252,19 @@ function App() {
               h('div', { className: 'ebig' }, '∅'),
               h('h3', null, '没有匹配的内容'),
               h('p', null, '换个关键词，或切回「全部」'))
-          : view.map(p => h(Post, { key: p.id || p.title, p, onOpen: setOpen }))
+          : view.map(p => h(Post, { key: p.id || p.title, p, onOpen: setOpen, onRead: setReading }))
     ),
     ),  /* /col */
 
     // ===== 详情抽屉 =====
-    h(Detail, { p: open, onClose: () => setOpen(null) }),
+    h(Detail, {
+      p: open,
+      onClose: () => setOpen(null),
+      onRead: (x) => { setOpen(null); setReading(x); }
+    }),
+
+    // ===== 本站阅读视图 =====
+    h(Reader, { p: reading, onClose: () => setReading(null) }),
 
     // ===== 右下浮动按钮（X 的发帖按钮位）=====
     h('button', {
