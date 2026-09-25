@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>AIHOT / X</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="root"><div class="boot">载入中…</div></div>
+<script>
+// 把模块加载错误显示到页面上（否则在 minis:// 下是黑盒）
+window.addEventListener('error', e => {
+  const r = document.getElementById('root');
+  if (r) r.innerHTML = '<div style="padding:20px;color:#f4212e;font:13px monospace;white-space:pre-wrap">'
+    + 'ERR: ' + (e.message || e.error || '') + '\n' + (e.filename || '') + ':' + (e.lineno || '') + '</div>';
+}, true);
+window.addEventListener('unhandledrejection', e => {
+  const r = document.getElementById('root');
+  if (r) r.innerHTML = '<div style="padding:20px;color:#f4212e;font:13px monospace;white-space:pre-wrap">'
+    + 'REJECT: ' + (e.reason && (e.reason.stack || e.reason.message) || e.reason) + '</div>';
+});
+</script>
+<script src="feeds.js"></script>
+<script type="module" src="app.jsx.js"></script>
+</body>
+</html>
