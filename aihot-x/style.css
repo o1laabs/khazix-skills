@@ -160,3 +160,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pacts .act.src{border-color:#1d9bf0;color:#1d9bf0}
 /* 详情：灰边 */
 .pacts .act.more{margin-left:auto}
+/* ===== 本站阅读视图 ===== */
+.reader-wrap{position:fixed;inset:0;background:#000;z-index:10000;display:flex;flex-direction:column;overflow:hidden}
+.reader{display:flex;flex-direction:column;height:100%;background:#000}
+.rd-bar{position:sticky;top:0;display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(0,0,0,.92);border-bottom:1px solid #2f3336;z-index:2;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.rd-back{background:none;border:none;color:#1d9bf0;font-size:15px;font-weight:600;cursor:pointer;padding:4px 2px}
+.rd-src{flex:1;font-size:13px;color:#71767b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.rd-out{color:#1d9bf0;font-size:13px;font-weight:600;white-space:nowrap}
+.rd-body{padding:20px 18px 60px;overflow-y:auto;-webkit-overflow-scrolling:touch;max-width:720px;margin:0 auto;width:100%}
+.rd-title{font-size:21px;line-height:1.42;font-weight:700;color:#e7e9ea;margin:0 0 12px;letter-spacing:-.2px}
+.rd-meta{font-size:12.5px;color:#71767b;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #2f3336}
+.rd-lead{font-size:15px;line-height:1.75;color:#c7cdd3;background:#0d1117;border-left:3px solid #1d9bf0;padding:12px 14px;border-radius:8px;margin-bottom:20px}
+.rd-p{font-size:16px;line-height:1.85;color:#d6d9db;margin:0 0 16px;word-break:break-word}
+.rd-empty{font-size:14px;line-height:1.9;color:#71767b;text-align:center;padding:40px 0}
+.rd-link{color:#1d9bf0;font-weight:600}
