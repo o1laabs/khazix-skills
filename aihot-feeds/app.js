@@ -252,12 +252,34 @@ function render() {
     return;
   }
 
-  rows.forEach(r => box.appendChild(card(r)));
-  const f = el('div', '', `<div style="text-align:center;color:var(--tx3);font-size:12px;padding:14px 0">— 共 ${rows.length} 条 —</div>`);
+  // 瀑布流：按列数建桶，每次塞进当前最矮的那列（IG / 视频号 那种错落效果）
+  const ncol = window.innerWidth >= 680 ? 3 : 2;
+  const cols = [], heights = new Array(ncol).fill(0);
+  for (let i = 0; i < ncol; i++) {
+    const c = el('div', 'col');
+    cols.push(c); box.appendChild(c);
+  }
+  rows.forEach(r => {
+    // 用稳定哈希预估高度（真实高度要等布局，先按封面比例+标题长度估）
+    const est = (coverRatio(r) ? 246 : 197) + 60 + Math.min((r.title || '').length, 60) * 0.7;
+    let k = 0;
+    for (let i = 1; i < ncol; i++) if (heights[i] < heights[k]) k = i;
+    cols[k].appendChild(card(r));
+    heights[k] += est;
+  });
+
+  const f = el('div', '', `<div style="text-align:center;color:var(--tx3);font-size:12px;padding:16px 0">— 共 ${rows.length} 条 —</div>`);
   box.appendChild(f);
 }
 
-/* 从来源名生成稳定的头像色 + 首字（微信订阅号那种） */
+/* 窗口宽度跨过断点时重排（列数会变） */
+let _lastCols = window.innerWidth >= 680 ? 3 : 2;
+window.addEventListener('resize', () => {
+  const n = window.innerWidth >= 680 ? 3 : 2;
+  if (n !== _lastCols) { _lastCols = n; render(); }
+});
+
+/* 从来源名生成稳定的封面渐变 + 首字（IG 那种每张图不同色的观感） */
 function avatarOf(name) {
   const s = String(name || '?').replace(/^[Xx]：\s*/, '').replace(/[（(].*?[)）]/g, '').trim() || '?';
   let h = 0;
@@ -266,42 +288,52 @@ function avatarOf(name) {
     ['#5b8cff', '#3d63cc'], ['#3ecf8e', '#2a9d6b'], ['#f5a524', '#c47f12'],
     ['#7c5cff', '#5a3fd6'], ['#f0616d', '#c9404f'], ['#38bdf8', '#0e8fc4'],
     ['#f094b8', '#c96a91'], ['#a78bfa', '#7f5fe0'], ['#5fd6c4', '#33a394'],
+    ['#ff8a5c', '#d95f34'], ['#e8b04b', '#b8862b'], ['#6ee7b7', '#34a87e'],
   ];
   const [c1, c2] = palette[h % palette.length];
   return { ch: s[0] || '?', grad: `linear-gradient(135deg,${c1},${c2})` };
+}
+
+/* 用标题哈希决定封面高矮（IG 瀑布流的关键：不等高） */
+function coverRatio(r) {
+  let h = 0;
+  const s = String(r.title || '') + String(r.source || '');
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return (h % 3 === 0) ? 'tall' : '';
 }
 
 function card(r) {
   const catKey = CAT[r.category] || '';
   const av = avatarOf(r.source);
   const c = el('div', 'card');
-  const hasThumb = !!(r.summary && r.summary.length > 40);
   c.innerHTML = `
+    <div class="cover ${coverRatio(r)}" style="background:${av.grad}">
+      <span class="glyph">${esc(av.ch)}</span>
+      ${catKey ? `<span class="tag">${esc(catKey)}</span>` : ''}
+      ${r.score != null && r.score >= 60 ? `<span class="hot">★ ${esc(r.score)}</span>` : ''}
+    </div>
     <div class="cbody">
-      <div class="cmain">
-        <div class="ctitle">${esc(r.title)}</div>
-        ${r.summary ? `<div class="csum">${esc(r.summary)}</div>` : ''}
-        <div class="cfoot">
-          <span class="cavatar" style="background:${av.grad}">${esc(av.ch)}</span>
-          <span class="src">${esc(r.source || '未知来源')}</span>
-          <span class="time">${ago(r.publishedAt)}</span>
-        </div>
+      <div class="ctitle">${esc(r.title)}</div>
+      ${r.summary ? `<div class="csum">${esc(r.summary)}</div>` : ''}
+      <div class="cfoot">
+        <span class="cavatar" style="background:${av.grad}">${esc(av.ch)}</span>
+        <span class="src">${esc(r.source || '未知来源')}</span>
+        <span class="time">${ago(r.publishedAt)}</span>
       </div>
-      ${hasThumb ? `<div class="cthumb"><span class="fav" style="background:${av.grad}">${esc(av.ch)}</span></div>` : ''}
-    </div>
-    <div class="cmeta">
-      ${catKey ? `<span class="cat ${esc(r.category)}">${esc(catKey)}</span>` : ''}
-      ${r.aihot ? `<a class="lk" href="${esc(r.aihot)}" target="_blank" rel="noopener">站内阅读 →</a>` : ''}
-      ${r.original ? `<a class="lk dim" href="${esc(r.original)}" target="_blank" rel="noopener">原文</a>` : ''}
-      ${r.score != null ? `<span class="score">score ${esc(r.score)}</span>` : ''}
-    </div>
-    ${r.reason ? `<div class="reason"><b>推荐理由</b> · ${esc(r.reason)}</div>` : ''}`;
+      <div class="cmeta">
+        ${r.aihot ? `<a class="lk" href="${esc(r.aihot)}" target="_blank" rel="noopener">站内阅读 →</a>` : ''}
+        ${r.original ? `<a class="lk dim" href="${esc(r.original)}" target="_blank" rel="noopener">原文</a>` : ''}
+      </div>
+      ${r.reason ? `<div class="reason"><b>推荐理由</b> · ${esc(r.reason)}</div>` : ''}
+    </div>`;
 
-  // 点正文区展开/收起（链接不触发）
-  c.querySelector('.cbody').onclick = (e) => {
+  // 点图或标题展开/收起（链接不触发）
+  const toggle = (e) => {
     if (e.target.closest('a')) return;
     c.classList.toggle('open');
   };
+  c.querySelector('.cover').onclick = toggle;
+  c.querySelector('.ctitle').onclick = toggle;
   return c;
 }
 
