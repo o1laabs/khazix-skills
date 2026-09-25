@@ -16,11 +16,7 @@ function Post({ p, onOpen }) {
   const { lead: t1, rest: t2 } = splitTitle(p.title);
 
   return h('article', {
-    className: 'post',
-    onClick: () => onOpen(p),
-    onTouchEnd: (e) => { e.preventDefault(); onOpen(p); },
-    role: 'button',
-    tabIndex: 0
+    className: 'post'
   },
     // 主体（已去掉头像列）
     h('div', { className: 'pmain' },
@@ -52,14 +48,14 @@ function Post({ p, onOpen }) {
         p.aihot
           ? h('a', {
               className: 'act open',
-              href: p.aihot, target: '_blank', rel: 'noopener',
+              href: p.aihot, target: '_self',
               onClick: e => e.stopPropagation()
             }, '站内阅读 →')
           : null,
         p.original
           ? h('a', {
               className: 'act src',
-              href: p.original, target: '_blank', rel: 'noopener',
+              href: p.original, target: '_self',
               onClick: e => e.stopPropagation()
             }, '查看原文')
           : null,
@@ -101,8 +97,8 @@ function Detail({ p, onClose }) {
           p.score != null ? h('span', { className: 'chip' }, 'score ' + p.score) : null
         ),
         h('div', { className: 'slinks' },
-          p.aihot ? h('a', { className: 'btn primary', href: p.aihot, target: '_blank', rel: 'noopener' }, '站内阅读') : null,
-          p.original ? h('a', { className: 'btn', href: p.original, target: '_blank', rel: 'noopener' }, '查看原文') : null
+          p.aihot ? h('a', { className: 'btn primary', href: p.aihot, target: '_self' }, '站内阅读') : null,
+          p.original ? h('a', { className: 'btn', href: p.original, target: '_self' }, '查看原文') : null
         )
       )
     )
