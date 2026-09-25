@@ -1,6 +1,6 @@
 /* ============ AIHOT / X —— 主应用（React 18，X 风格） ============ */
 import { React, createRoot, h } from './react-lite.js?v=5';
-import { loadFeed, CAT, CATS, relTime, avatarOf, coverRatio, splitTitle } from './data.js?v=5';
+import { loadFeed, CAT, CATS, relTime, coverRatio, splitTitle } from './data.js?v=5';
 import { Icon } from './icons.js?v=5';
 
 const { useState, useEffect, useMemo, useCallback, useRef } = React;
@@ -15,7 +15,6 @@ function Post({ p, onOpen }) {
   const [liked, setLiked] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [saved, setSaved] = useState(false);
-  const av = avatarOf(p.source);
 
   // 由 score 派生一个稳定的互动数（X 每条都带数字，视觉上不能空）
   const seed = useMemo(() => {
@@ -31,13 +30,14 @@ function Post({ p, onOpen }) {
 
   const { lead: t1, rest: t2 } = splitTitle(p.title);
 
-  return h('article', { className: 'post', onClick: () => onOpen(p) },
-    // 头像列
-    h('div', { className: 'pav' },
-      h('div', { className: 'avatar', style: { background: av.grad } }, av.ch)
-    ),
-
-    // 主体
+  return h('article', {
+    className: 'post',
+    onClick: () => onOpen(p),
+    onTouchEnd: (e) => { e.preventDefault(); onOpen(p); },
+    role: 'button',
+    tabIndex: 0
+  },
+    // 主体（已去掉头像列）
     h('div', { className: 'pmain' },
       // 头部：来源 + 蓝勾 + 时间 + 更多
       h('div', { className: 'phead' },
@@ -88,7 +88,7 @@ function Post({ p, onOpen }) {
 
 /* ---------- 详情抽屉（X 点开推文的模态） ---------- */
 function Detail({ p, onClose }) {
-  const av = p ? avatarOf(p.source) : null;
+  
   useEffect(() => {
     const k = e => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', k);
@@ -102,7 +102,6 @@ function Detail({ p, onClose }) {
       ),
       h('div', { className: 'sheet-body' },
         h('div', { className: 'srow' },
-          h('div', { className: 'avatar lg', style: { background: av.grad } }, av.ch),
           h('div', null,
             h('div', { className: 'pname' }, p.source || '未知来源'),
             h('div', { className: 'ptime' }, relTime(p.publishedAt))
