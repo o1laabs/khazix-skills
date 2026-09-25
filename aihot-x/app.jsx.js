@@ -12,22 +12,7 @@ const nfmt = (n) => n >= 10000 ? (n / 10000).toFixed(1) + '万'
 
 /* ---------- 单条推文（X 的核心组件） ---------- */
 function Post({ p, onOpen }) {
-  const [liked, setLiked] = useState(false);
-  const [reposted, setReposted] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  // 由 score 派生一个稳定的互动数（X 每条都带数字，视觉上不能空）
-  const seed = useMemo(() => {
-    let h = 0; const s = p.id || p.title || '';
-    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-    return h;
-  }, [p.id, p.title]);
-  const base = Math.max(1, Math.round((p.score || 30) * 1.6));
-  const nReply = (seed % 37) + base % 23;
-  const nRepost = (seed % 211) + base;
-  const nLike = (seed % 900) + base * 3;
-  const nView = (seed % 90000) + base * 420;
-
+  const cat = CAT[p.category];
   const { lead: t1, rest: t2 } = splitTitle(p.title);
 
   return h('article', {
@@ -62,25 +47,26 @@ function Post({ p, onOpen }) {
         ? h('div', { className: 'pcat' }, h('span', { className: 'chip ' + p.category }, CAT[p.category]))
         : null,
 
-      // 操作栏（X 的四个按钮 + 浏览量）
+      // 操作栏：两个真实入口（站内阅读 / 查看原文）
       h('div', { className: 'pacts' },
-        h('button', { className: 'act reply', onClick: e => e.stopPropagation() },
-          Icon.Reply(), h('span', null, nfmt(nReply))),
+        p.aihot
+          ? h('a', {
+              className: 'act open',
+              href: p.aihot, target: '_blank', rel: 'noopener',
+              onClick: e => e.stopPropagation()
+            }, '站内阅读 →')
+          : null,
+        p.original
+          ? h('a', {
+              className: 'act src',
+              href: p.original, target: '_blank', rel: 'noopener',
+              onClick: e => e.stopPropagation()
+            }, '查看原文')
+          : null,
         h('button', {
-          className: cls('act repost', reposted && 'on-repost'),
-          onClick: e => { e.stopPropagation(); setReposted(v => !v); }
-        }, Icon.Repost(), h('span', null, nfmt(nRepost + (reposted ? 1 : 0)))),
-        h('button', {
-          className: cls('act like', liked && 'on-like'),
-          onClick: e => { e.stopPropagation(); setLiked(v => !v); }
-        }, Icon.Like({ solid: liked }), h('span', null, nfmt(nLike + (liked ? 1 : 0)))),
-        h('button', {
-          className: cls('act save', saved && 'on-save'),
-          onClick: e => { e.stopPropagation(); setSaved(v => !v); }
-        }, Icon.Bookmark({ solid: saved })),
-        h('button', {
-          className: 'act views', onClick: e => { e.stopPropagation(); }
-        }, Icon.Views(), h('span', null, nfmt(nView)))
+          className: 'act more',
+          onClick: e => { e.stopPropagation(); onOpen(p); }
+        }, '详情')
       )
     )
   );
